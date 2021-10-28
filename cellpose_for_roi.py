@@ -40,7 +40,7 @@ def get_roi_number():
 	tk.WSignUp = tk.Button(root, text="Extract", command=getvalue).grid(row=3, column=0) #button
 	root.mainloop()
 
-def main():
+def main(args):
 	startt = datetime.now()
 	print("Cellpose for ROI Plugin, by Michael Morehead")
 	print("Attempts to apply Cellpose to a specific region of interest")
@@ -49,22 +49,24 @@ def main():
 	print("Usage: Highlight a project and use the Script Launcher in syGlass.")
 	print("---------------------------------------")
 	
+	projectList = args["selected_projects"]
+
 	doExtract = True
-	if len(sys.argv[0]) < 1:
+	if len(projectList) < 1:
 		print("Highlight a project before running to select a project!")
 		doExtract = False
 	
-	if len(sys.argv) > 1:
+	if len(projectList) > 1:
 		print("This script only supports 1 project at a time, please select only one project before running.")
 		doExtract = False
 
 
 	if doExtract:
-		syGlassProjectPath = sys.argv[0]
 		get_roi_number()
 		global returnString
+		project = projectList[0]
+		syGlassProjectPath = project.get_path_to_syg_file().string()
 		print("Extracting ROI " + str(returnString) + " from: " + syGlassProjectPath)
-		project = sy.get_project(syGlassProjectPath)
 		roi_block = project.get_roi_data(int(returnString))
 		data = np.squeeze(roi_block.data[:,:,:,0])
 		tifffile.imsave('data_orig.tiff', data)
@@ -77,7 +79,4 @@ def main():
 	
 	print("total time running entire pipeline\n")
 	print(datetime.now() - startt)
-
-if __name__== "__main__":
-	main() 
 
